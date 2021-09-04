@@ -2,6 +2,7 @@ asgiref==3.4.1
 astroid==2.7.3
 black==21.8b0
 click==8.0.1
+deta==1.0.0
 fastapi==0.68.1
 flake8==3.9.2
 h11==0.12.0
