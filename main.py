@@ -81,7 +81,7 @@ async def dpsCalculator(body: DpsCalculator, wallet: str):
 
     dpsDB.put(x, str(body.id))
 
-    return x
+    return {"success": True, "data": x, "message": ""}
 
 
 # seasonpass getter
@@ -95,11 +95,15 @@ async def seasonOnePass(wallet: str):
     pupitemsDPSReal = calculateItemsDPS(data["pupskins"], data["pupitems"], wallet)
 
     return {
-        "wallet": wallet,
-        "season": "one",
-        "dps": {
-            "pupskins": pupskinsDPS,
-            "pupcards": pupcardsDPS,
-            "pupitems": {"raw": pupitemsDPSRaw, "real": pupitemsDPSReal},
+        "success": True,
+        "data": {
+            "wallet": wallet,
+            "season": "one",
+            "dps": {
+                "pupskins": pupskinsDPS,
+                "pupcards": pupcardsDPS,
+                "pupitems": {"raw": pupitemsDPSRaw, "real": pupitemsDPSReal},
+            },
         },
+        "message": "",
     }
