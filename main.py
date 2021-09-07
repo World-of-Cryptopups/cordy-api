@@ -71,7 +71,12 @@ async def dpsCalculator(body: DpsCalculator, wallet: str):
 
     x = {
         "wallet": wallet,
-        "user": body,
+        "user": {
+            "id": body.id,
+            "username": body.username,
+            "avatar": body.avatar,
+            "tag": body.tag,
+        },
         "dps": {
             "pupskins": pupskinsDPS,
             "pupcards": pupcardsDPS,
