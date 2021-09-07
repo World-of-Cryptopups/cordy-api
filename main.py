@@ -51,7 +51,7 @@ async def userdps(userid: str, res: Response):
 
 
 class DpsCalculator(BaseModel):
-    id: int
+    id: str
     username: str
     avatar: str
     tag: str
@@ -84,7 +84,7 @@ async def dpsCalculator(body: DpsCalculator, wallet: str):
         },
     }
 
-    dpsDB.put(x, str(body.id))
+    dpsDB.put(x, body.id)
 
     return {"success": True, "data": x, "message": ""}
 
