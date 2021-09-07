@@ -1,6 +1,9 @@
+from calc import calculateDPS, calculateItemsDPS
+from fetcher import fetcher_worker, seasonfetcher_worker
 import os
 from fastapi import FastAPI, Response, status
 from deta import Deta
+from pydantic import BaseModel
 
 
 app = FastAPI()
@@ -36,7 +39,7 @@ async def userid(userid: str, res: Response):
 @app.get("/dps/{userid}")
 async def userdps(userid: str, res: Response):
     userDPS = dpsDB.get(userid)
-    
+
     if userDPS is None:
         res.status_code = status.HTTP_404_NOT_FOUND
 
@@ -44,4 +47,59 @@ async def userdps(userid: str, res: Response):
         "success": userDPS is not None,
         "data": userDPS,
         "message": "User does not exist!" if userDPS is None else "",
+    }
+
+
+class DpsCalculator(BaseModel):
+    id: int
+    username: str
+    avatar: str
+    tag: str
+
+
+# dps fetcher and calculator
+@app.post("/dps/calculator/{wallet}")
+async def dpsCalculator(body: DpsCalculator, wallet: str):
+    data = fetcher_worker(wallet)
+
+    pupskinsDPS = calculateDPS(wallet, data["data"]["pupskins"])
+    pupcardsDPS = calculateDPS(wallet, data["data"]["pupcards"])
+    pupitemsDPSRaw = calculateDPS(wallet, data["data"]["pupitems"])
+    pupitemsDPSReal = calculateItemsDPS(
+        data["data"]["pupskins"], data["data"]["pupitems"], wallet
+    )
+
+    x = {
+        "wallet": wallet,
+        "user": body,
+        "dps": {
+            "pupskins": pupskinsDPS,
+            "pupcards": pupcardsDPS,
+            "pupitems": {"raw": pupitemsDPSRaw, "real": pupitemsDPSReal},
+        },
+    }
+
+    dpsDB.put(x, str(body.id))
+
+    return x
+
+
+# seasonpass getter
+@app.get("/seasonpass/one/{wallet}")
+async def seasonOnePass(wallet: str):
+    data = seasonfetcher_worker(wallet)
+
+    pupskinsDPS = calculateDPS(wallet, data["pupskins"])
+    pupcardsDPS = calculateDPS(wallet, data["pupcards"])
+    pupitemsDPSRaw = calculateDPS(wallet, data["pupitems"])
+    pupitemsDPSReal = calculateItemsDPS(data["pupskins"], data["pupitems"], wallet)
+
+    return {
+        "wallet": wallet,
+        "season": "one",
+        "dps": {
+            "pupskins": pupskinsDPS,
+            "pupcards": pupcardsDPS,
+            "pupitems": {"raw": pupitemsDPSRaw, "real": pupitemsDPSReal},
+        },
     }
