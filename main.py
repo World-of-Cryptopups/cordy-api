@@ -87,28 +87,3 @@ async def dpsCalculator(body: DpsCalculator, wallet: str):
     dpsDB.put(x, body.id)
 
     return {"success": True, "data": x, "message": ""}
-
-
-# seasonpass getter
-@app.get("/seasonpass/one/{wallet}")
-async def seasonOnePass(wallet: str):
-    data = seasonfetcher_worker(wallet)
-
-    pupskinsDPS = calculateDPS(wallet, data["pupskins"])
-    pupcardsDPS = calculateDPS(wallet, data["pupcards"])
-    pupitemsDPSRaw = calculateDPS(wallet, data["pupitems"])
-    pupitemsDPSReal = calculateItemsDPS(data["pupskins"], data["pupitems"], wallet)
-
-    return {
-        "success": True,
-        "data": {
-            "wallet": wallet,
-            "season": "one",
-            "dps": {
-                "pupskins": pupskinsDPS,
-                "pupcards": pupcardsDPS,
-                "pupitems": {"raw": pupitemsDPSRaw, "real": pupitemsDPSReal},
-            },
-        },
-        "message": "",
-    }
