@@ -7,10 +7,11 @@ def _fetcher(url: str):
         # os.environ will cause an error which we want
         r = requests.get(url)
 
+        print(r.headers)
         return r.json()
-    except KeyError:
-        pass
-    except Exception:
+
+    except Exception as e:
+        print(e)
         _fetcher(url)
 
 
