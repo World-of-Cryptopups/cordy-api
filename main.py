@@ -104,6 +104,16 @@ async def dpsCalculator(body: DpsCalculator, wallet: str):
     return {"success": True, "data": x, "message": ""}
 
 
+# calculate dps object
+def calcDPS(i: Dict):
+    return (
+        i["dps"]["pupcards"]
+        + i["dps"]["pupskins"]
+        + i["dps"]["pupitems"]["raw"]
+        + i["dps"]["pupitems"]["real"]
+    )
+
+
 # get all items and sort to get the leaderboard
 @app.get("/leaderboard")
 async def leaderboard():
@@ -118,10 +128,7 @@ async def leaderboard():
         return {"success": False, "data": None, "message": e}
 
     allitems.sort(
-        key=lambda i: i["dps"]["pupcards"]
-        + i["dps"]["pupskins"]
-        + i["dps"]["pupitems"]["raw"]
-        + i["dps"]["pupitems"]["real"],
+        key=lambda i: calcDPS(i),
         reverse=True,
     )
 
