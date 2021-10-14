@@ -1,3 +1,4 @@
+from typing import Dict, List
 from calc import calculateDPS, calculateItemsDPS
 from fetcher import fetcher_worker, seasonfetcher_worker
 import os
@@ -87,3 +88,27 @@ async def dpsCalculator(body: DpsCalculator, wallet: str):
     dpsDB.put(x, body.id)
 
     return {"success": True, "data": x, "message": ""}
+
+
+# get all items and sort to get the leaderboard
+@app.get("/leaderboard")
+async def leaderboard():
+    try:
+        q = dpsDB.fetch()
+        allitems: List[Dict] = q.items
+
+        while q.last:
+            allitems += q.items
+
+    except Exception as e:
+        return {"success": False, "data": None, "message": e}
+
+    allitems.sort(
+        key=lambda i: i["dps"]["pupcards"]
+        + i["dps"]["pupskins"]
+        + i["dps"]["pupitems"]["raw"]
+        + i["dps"]["pupitems"]["real"],
+        reverse=True,
+    )
+
+    return {"success": True, "data": allitems, "message": ""}
