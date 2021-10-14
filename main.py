@@ -3,11 +3,25 @@ from calc import calculateDPS, calculateItemsDPS
 from fetcher import fetcher_worker, seasonfetcher_worker
 import os
 from fastapi import FastAPI, Response, status
+from fastapi.middleware.cors import CORSMiddleware
 from deta import Deta
 from pydantic import BaseModel
 
 
+# new fastapi app
 app = FastAPI()
+
+# add cors middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# new deta project
 deta = Deta(os.getenv("DETA_PROJECT_KEY"))
 
 # dps db
