@@ -104,6 +104,47 @@ async def dpsCalculator(body: DpsCalculator, wallet: str):
     return {"success": True, "data": x, "message": ""}
 
 
+# demand get the dps of the user and update
+@app.get("/dps/demand/{userid}")
+async def dpsDemanCalculator(userid: str, res: Response):
+    user = wocDB.get(userid)
+
+    if user is None:
+        res.status_code = status.HTTP_404_NOT_FOUND
+
+        return {"success": False, "data": None, "message": "User does not exist!"}
+
+    wallet = user["wallet"]
+
+    data = fetcher_worker(wallet)
+
+    pupskinsDPS = calculateDPS(wallet, data["data"]["pupskins"])
+    pupcardsDPS = calculateDPS(wallet, data["data"]["pupcards"])
+    pupitemsDPSRaw = calculateDPS(wallet, data["data"]["pupitems"])
+    pupitemsDPSReal = calculateItemsDPS(
+        data["data"]["pupskins"], data["data"]["pupitems"], wallet
+    )
+
+    x = {
+        "wallet": wallet,
+        "user": {
+            "id": user["user"]["id"],
+            "username": user["user"]["username"],
+            "avatar": user["user"]["avatar"],
+            "tag": user["user"]["tag"],
+        },
+        "dps": {
+            "pupskins": pupskinsDPS,
+            "pupcards": pupcardsDPS,
+            "pupitems": {"raw": pupitemsDPSRaw, "real": pupitemsDPSReal},
+        },
+    }
+
+    dpsDB.put(x, user["user"]["id"])
+
+    return {"success": True, "data": x, "message": ""}
+
+
 # calculate dps object
 def calcDPS(i: Dict):
     return (
